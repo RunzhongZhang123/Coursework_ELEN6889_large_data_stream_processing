@@ -1,0 +1,37 @@
+from pyspark import SparkContext
+sc = SparkContext()
+data = sc.textFile("epa-http.txt").map(lambda x: (x.replace(':', ' ').split(' ')[0], x.replace(':', ' ').split(' ')[1], x.replace(':', ' ').split(' ')[2], x.replace(':', ' ').split(' ')[len(x.replace(':', ' ').split(' ')) - 1]))
+#print(data.take(15))
+data = data.filter(lambda x: x[3] != '-')
+#print(data.take(15))
+print("23 hour (the first day):")
+rdd = data.filter(lambda x: x[1] == '[29' and x[2] == '23')
+rdd = rdd.map(lambda x: (x[0], x[3]))
+rdd = rdd.reduceByKey(lambda x, y: int(x) + int(y))
+print(rdd.collect())
+print('\n')
+
+for i in range(10):
+	string = '0' + str(i)
+	print(string + ' hour (the second day):')
+	rdd = data.filter(lambda x: x[2] == string)
+	rdd = rdd.map(lambda x: (x[0], x[3]))
+	rdd = rdd.reduceByKey(lambda x, y: int(x) + int(y))
+	print(rdd.collect())
+	print('\n')
+
+for i in range(10, 23):
+	string = str(i)
+	print(string + ' hour (the second day):')
+	rdd = data.filter(lambda x: x[2] == string)
+	rdd = rdd.map(lambda x: (x[0], x[3]))
+	rdd = rdd.reduceByKey(lambda x, y: int(x) + int(y))
+	print(rdd.collect())
+	print('\n')
+
+print('23 hour (the second day):')
+rdd = data.filter(lambda x: x[1] == '[30' and x[2] == '23')
+rdd = rdd.map(lambda x: (x[0], x[3]))
+rdd = rdd.reduceByKey(lambda x, y: int(x) + int(y))
+print(rdd.collect())
+print('\n')
